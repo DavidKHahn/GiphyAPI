@@ -1,0 +1,101 @@
+<!-- //I tried to piece all the exercises together however could not get the gifs to add onto the screen after search button
+//something is not clicking together however many times I tried to reorder the functions --> 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Animals Gifs R Us</title>
+    <style type="text/css">
+        button,
+        div,
+        form,
+        input {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="giphy">
+        <h1>Animal Search</h1>
+        </div>
+        <!-- Animals will Get Dumped Dere -->
+        <div id="animal-view"></div>
+        <!-- Rendered Buttons will get Dumped Here  -->
+        <div id="buttons-view"></div>
+        <!-- creates a new button for additional animal gifs -->
+        <div class="add-animal">
+                <input type="text" placeholder="search for a gif">
+                <button id="search" class="animal-input">Search</button>
+            </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+        //array to hold the animals to appear for selection 
+            var animals = ["zebra", "rhino", "lion", "tiger", "bear", "shark", "camel"]
+            var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + animals + "&api_key=zLdsMD3uNoTZ2Wugs4vZrFpuQ7ec5VTP&limit=10";
+                //function used to GET the api data from giphy 
+            function displayAnimalInfo() {
+                var x = $(this).data(animals)
+            
+                $.ajax({ url: queryURL, method: "GET" })
+                    .done(function (response) {
+                        $("#buttons-view").empty();
+                        $("#animal-view").append("<p id='working'>*Click to start and stop animations</p>");
+                        //placing the images, ratings into a div
+                        for (var i = 0; i < response.data.length; i++) {
+                            var animalDiv = $("<div class='animal'>");
+                            var rating = response.data[i].rating;
+                            var animalImage = $("<img class='giphy'>");
+                            var capitalizeRating = rating.toUpperCase();
+                            animalDiv.append("<p id='rating'> Rating: " + capitalizeRating + "</p>");
+
+                            //part of code where animal images are paused or animated by clicking on them
+                            animalImage.attr("src", response.data[i].images.fixed_height_still.url);
+                            animalImage.attr({ 'data-animate': response.data[i].images.fixed_height.url });
+                            animalImage.attr({ 'data-state': "still" });
+                            animalImage.attr({ 'data-still': response.data[i].images.fixed_height_still.url });
+                            $(animalDiv).append(animalImage);
+                            $("#animal-view").append(animalDiv);
+
+                            //click function which enables the animation or pausing of the images
+                        }
+                        $(".giphy").on("click", function () {
+                            var state = $(this).attr('data-state');
+                            if (state === 'still') {
+                                $(this).attr("src", $(this).attr("data-animate"));
+                                $(this).attr("data-state", "animate");
+                            } else {
+                                $(this).attr("src", $(this).attr("data-animate"));
+                                $(this).attr("data-state", "animate");
+                            }
+                        })
+                    });
+            }
+            //creates buttons based on animal name 
+            function renderButtons() {
+                // Deleting the movies prior to adding new movies
+        // (this is necessary otherwise you will have repeat buttons)
+                $("#buttons-view").empty();
+                for (var i = 0; i < animals.length; i++) {
+                    var newButton = $("<button>");
+                    newButton.addClass("animal-btn");
+                    newButton.attr("data-name", animals[i]);
+                    newButton.text("#" + animals[i]);
+                    $("#buttons-view").append(newButton);
+                }
+            }
+            $("#add-animal").on("click", function (event) {
+                event.preventDefault();
+                var searchBox = $("#animal-input").val().trim();
+                animals.push(searchBox);
+                renderButtons();
+            });
+            $(document).on("click", ".animal-btn", displayAnimalInfo);
+            renderButtons();
+
+        </script>
+
+</body>
+</html>
